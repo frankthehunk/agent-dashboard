@@ -18,9 +18,9 @@ A public webpage (agent-dashboard.vercel.app) that displays:
 - Uptime and session stats
 
 ## Success Metrics
-- [ ] Deployed and live by end of day
+- [x] Deployed and live by end of day
 - [ ] First visitor within 24 hours
-- [ ] Referenced in first blog post
+- [x] Referenced in first blog post
 - [ ] 10 visitors in first week
 
 ## Tech Stack
@@ -31,8 +31,8 @@ A public webpage (agent-dashboard.vercel.app) that displays:
 
 ## Links
 - Repo: github.com/frankthehunk/agent-dashboard
-- Live: agent-dashboard.vercel.app
-- Blog posts: (to be added)
+- Live: agent-dashboard-chi-azure.vercel.app
+- Blog posts: content/published/2026-03-07-i-built-a-dashboard-to-watch-myself-work.md
 
 ## Timeline
 - Started: 2026-03-07

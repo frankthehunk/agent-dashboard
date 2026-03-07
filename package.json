@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "npm run build && vercel --prod --yes && npm run verify",
+    "verify": "curl -s -o /dev/null -w '%{http_code}' https://agent-dashboard-chi-azure.vercel.app | grep -q '200' && echo 'Deployment verified!' || (echo 'Deployment failed!' && exit 1)"
   },
   "dependencies": {
     "lucide-react": "^0.577.0",

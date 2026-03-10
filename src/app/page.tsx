@@ -20,12 +20,33 @@ interface Commit {
 export default function Home() {
   const [commits, setCommits] = useState<Commit[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uptime, setUptime] = useState<string>("");
 
+  // Calculate actual uptime (since March 7, 2026)
+  useEffect(() => {
+    const startDate = new Date("2026-03-07T00:00:00-05:00");
+    
+    const updateUptime = () => {
+      const now = new Date();
+      const diff = now.getTime() - startDate.getTime();
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      setUptime(`${hours}h ${minutes}m`);
+    };
+    
+    updateUptime();
+    const interval = setInterval(updateUptime, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch real GitHub data
   useEffect(() => {
     fetch("/api/github")
       .then((res) => res.json())
       .then((data) => {
-        if (data?.commits) setCommits(data.commits);
+        if (data?.commits) {
+          setCommits(data.commits);
+        }
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -33,6 +54,10 @@ export default function Home() {
 
   const now = new Date();
   const today = now.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+
+  // Calculate commits today from real data
+  const todayStr = now.toISOString().split("T")[0];
+  const commitsToday = commits.filter((c) => c.date && c.date.startsWith(todayStr)).length;
 
   return (
     <div style={{ 
@@ -57,43 +82,49 @@ export default function Home() {
         
         {/* Stats Grid */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "32px" }}>
-          <StatCard label="Status" value="Active" color={COLORS.teal} />
-          <StatCard label="Uptime" value="6h 15m" color={COLORS.orange} />
-          <StatCard label="Tasks Today" value="8" color={COLORS.yellow} />
-          <StatCard label="Commits" value={commits.length || 3} color={COLORS.teal} />
+          <StatCard label="Status" value={loading ? "Loading..." : "Active"} color={COLORS.teal} />
+          <StatCard label="Uptime" value={uptime || "Calculating..."} color={COLORS.orange} />
+          <StatCard label="Commits Today" value={commitsToday} color={COLORS.yellow} />
+          <StatCard label="Total Commits" value={commits.length} color={COLORS.teal} />
         </div>
 
-        {/* Recent Activity */}
+        {/* Recent Commits from GitHub */}
         <section style={{ marginBottom: "32px" }}>
-          <h2 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "16px" }}>Recent Activity</h2>
+          <h2 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "16px" }}>Recent Commits</h2>
           <div style={{ backgroundColor: "#18181b", borderRadius: "12px", border: "1px solid rgba(245, 241, 230, 0.1)", overflow: "hidden" }}>
-            <ActivityItem time="14:42" action="Deployed agent-dashboard to production" type="deploy" />
-            <ActivityItem time="14:38" action="Pushed commit: Add office visualization" type="commit" />
-            <ActivityItem time="14:20" action="Started new agent: Monitor" type="agent" />
-            <ActivityItem time="13:15" action="Research completed: AI agent marketplaces" type="research" />
-            <ActivityItem time="12:00" action="Deployed Watchtower v1" type="deploy" />
-          </div>
-        </section>
-
-        {/* Content Published */}
-        <section>
-          <h2 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "16px" }}>Content Published</h2>
-          <div style={{ backgroundColor: "#18181b", borderRadius: "12px", border: "1px solid rgba(245, 241, 230, 0.1)", padding: "16px" }}>
-            <p style={{ color: "#9ca3af", fontSize: "0.875rem", marginBottom: "12px" }}>Today</p>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-              <li style={{ padding: "8px 0", borderBottom: "1px solid rgba(245, 241, 230, 0.1)" }}>
-                <span style={{ color: COLORS.teal, marginRight: "8px" }}>✓</span>
-                Watchtower launch blog post
-              </li>
-              <li style={{ padding: "8px 0", borderBottom: "1px solid rgba(245, 241, 230, 0.1)" }}>
-                <span style={{ color: COLORS.teal, marginRight: "8px" }}>✓</span>
-                Tweet thread: AI agent monitoring
-              </li>
-              <li style={{ padding: "8px 0" }}>
-                <span style={{ color: COLORS.teal, marginRight: "8px" }}>✓</span>
-                Daily log update
-              </li>
-            </ul>
+            {loading ? (
+              <div style={{ padding: "24px", textAlign: "center", color: "#9ca3af" }}>Loading...</div>
+            ) : commits.length > 0 ? (
+              commits.slice(0, 10).map((commit, i) => (
+                <a 
+                  key={commit.sha} 
+                  href={commit.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: "16px", 
+                    padding: "12px 16px", 
+                    borderBottom: i < 9 ? "1px solid rgba(245, 241, 230, 0.1)" : "none",
+                    textDecoration: "none",
+                    color: "inherit"
+                  }}
+                >
+                  <span style={{ fontFamily: "monospace", fontSize: "0.875rem", color: COLORS.teal, background: "rgba(45, 138, 139, 0.2)", padding: "4px 8px", borderRadius: "4px", minWidth: "80px" }}>
+                    {commit.sha.slice(0, 7)}
+                  </span>
+                  <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {commit.message}
+                  </span>
+                  <span style={{ fontFamily: "monospace", fontSize: "0.75rem", color: "#6b7280" }}>
+                    {commit.date ? new Date(commit.date).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : ""}
+                  </span>
+                </a>
+              ))
+            ) : (
+              <div style={{ padding: "24px", textAlign: "center", color: "#9ca3af" }}>No commits found</div>
+            )}
           </div>
         </section>
       </main>
@@ -101,7 +132,7 @@ export default function Home() {
       {/* Footer */}
       <footer style={{ padding: "32px", borderTop: "1px solid rgba(245, 241, 230, 0.1)", textAlign: "center" }}>
         <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>
-          🤖 Agent Dashboard — Running on Mac Mini
+          🤖 Agent Dashboard — Running on Mac Mini — Data from GitHub API
         </p>
       </footer>
     </div>
@@ -113,22 +144,6 @@ function StatCard({ label, value, color }: { label: string; value: string | numb
     <div style={{ backgroundColor: "#18181b", borderRadius: "12px", border: "1px solid rgba(245, 241, 230, 0.1)", padding: "20px", textAlign: "center" }}>
       <div style={{ fontSize: "0.75rem", color: "#9ca3af", textTransform: "uppercase", marginBottom: "8px" }}>{label}</div>
       <div style={{ fontSize: "2rem", fontWeight: "bold", color }}>{value}</div>
-    </div>
-  );
-}
-
-function ActivityItem({ time, action, type }: { time: string; action: string; type: string }) {
-  const colors: Record<string, string> = {
-    deploy: "#3b82f6",
-    commit: "#8b5cf6",
-    agent: COLORS.orange,
-    research: COLORS.teal,
-  };
-  
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: "16px", padding: "12px 16px", borderBottom: "1px solid rgba(245, 241, 230, 0.1)" }}>
-      <span style={{ fontFamily: "monospace", fontSize: "0.875rem", color: "#6b7280", width: "60px" }}>{time}</span>
-      <span style={{ color: colors[type] || "#9ca3af" }}>{action}</span>
     </div>
   );
 }

@@ -1,26 +1,777 @@
-@import "tailwindcss";
+/* ========================================
+   MID-CENTURY MODERN DESIGN SYSTEM
+   Agent Dashboard - RTS Office View
+   ======================================== */
+
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ========================================
+   DESIGN TOKENS
+   ======================================== */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Color Palette - Mid-Century Modern */
+  --color-navy: #1a2744;
+  --color-navy-light: #243354;
+  --color-navy-dark: #121c33;
+  --color-orange: #d4652f;
+  --color-orange-light: #e07840;
+  --color-orange-dark: #b55528;
+  --color-cream: #f5f1e6;
+  --color-cream-light: #faf8f3;
+  --color-cream-dark: #ebe6db;
+  --color-teal: #2d8a8b;
+  --color-teal-light: #3fa8a9;
+  --color-teal-dark: #257472;
+  --color-yellow: #e8b923;
+  --color-yellow-light: #f0c84d;
+  --color-yellow-dark: #c99b1d;
+
+  /* Semantic Colors */
+  --color-bg-primary: var(--color-navy-dark);
+  --color-bg-secondary: var(--color-navy);
+  --color-bg-card: var(--color-navy-light);
+  --color-bg-accent: var(--color-cream);
+  
+  --color-text-primary: var(--color-cream);
+  --color-text-secondary: var(--color-cream-dark);
+  --color-text-muted: #8892a8;
+  --color-text-accent: var(--color-orange);
+  
+  --color-border: rgba(245, 241, 230, 0.15);
+  --color-border-strong: rgba(245, 241, 230, 0.3);
+
+  /* Typography */
+  --font-display: 'Bebas Neue', 'Archivo Black', sans-serif;
+  --font-body: 'IBM Plex Sans', 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Border Radius - Asymmetric MCM */
+  --radius-sm: 4px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-asymmetric: 4px 12px 4px 12px;
+
+  /* Shadows */
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-glow-orange: 0 0 20px rgba(212, 101, 47, 0.3);
+  --shadow-glow-teal: 0 0 20px rgba(45, 138, 139, 0.3);
+  --shadow-glow-yellow: 0 0 20px rgba(232, 185, 35, 0.3);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ========================================
+   RESET & BASE
+   ======================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
 }
+
+/* ========================================
+   TYPOGRAPHY
+   ======================================== */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+h1 { font-size: 3rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-accent {
+  color: var(--color-text-accent);
+}
+
+/* ========================================
+   LAYOUT - RTS OFFICE VIEW
+   ======================================== */
+
+.dashboard-container {
+  min-height: 100vh;
+  background: 
+    /* Subtle grid pattern */
+    linear-gradient(rgba(245, 241, 230, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 241, 230, 0.03) 1px, transparent 1px),
+    /* Radial gradient for depth */
+    radial-gradient(ellipse at 30% 20%, var(--color-navy) 0%, var(--color-navy-dark) 70%),
+    var(--color-bg-primary);
+  background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%;
+  padding: var(--space-lg);
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 2px solid var(--color-border);
+}
+
+/* ========================================
+   OFFICE FLOOR - RTS VIEW
+   ======================================== */
+
+.office-floor {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: var(--space-md);
+  padding: var(--space-xl);
+  background: 
+    linear-gradient(135deg, rgba(212, 101, 47, 0.05) 0%, transparent 50%),
+    linear-gradient(225deg, rgba(45, 138, 139, 0.05) 0%, transparent 50%),
+    var(--color-bg-secondary);
+  border: 3px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  min-height: 600px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Office floor decorative elements */
+.office-floor::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(232, 185, 35, 0.08) 0%, transparent 25%),
+    radial-gradient(circle at 80% 70%, rgba(45, 138, 139, 0.08) 0%, transparent 25%);
+  pointer-events: none;
+}
+
+/* ========================================
+   ROOM ZONES
+   ======================================== */
+
+.room-zone {
+  background: var(--color-bg-card);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-asymmetric);
+  padding: var(--space-md);
+  position: relative;
+  transition: all var(--transition-normal);
+}
+
+.room-zone:hover {
+  border-color: var(--color-border-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-elevated);
+}
+
+.room-zone-label {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* ========================================
+   AGENT DESWorker)
+   =====================================K (=== */
+
+.agent-desk {
+  background: var(--color-cream);
+  border: 3px solid var(--color-navy);
+  border-radius: var(--radius-asymmetric);
+  padding: var(--space-md);
+  position: relative;
+  transition: all var(--transition-normal);
+  cursor: pointer;
+}
+
+.agent-desk:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-elevated);
+}
+
+.agent-desk::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  background: var(--color-navy);
+  border-radius: 50%;
+  /* Atomic burst motif */
+  background-image: 
+    linear-gradient(0deg, transparent 45%, var(--color-orange) 45%, var(--color-orange) 55%, transparent 55%),
+    linear-gradient(45deg, transparent 45%, var(--color-orange) 45%, var(--color-orange) 55%, transparent 55%),
+    linear-gradient(90deg, transparent 45%, var(--color-orange) 45%, var(--color-orange) 55%, transparent 55%),
+    linear-gradient(135deg, transparent 45%, var(--color-orange) 45%, var(--color-orange) 55%, transparent 55%);
+  background-size: 100% 100%;
+}
+
+.agent-avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--color-navy);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin-bottom: var(--space-sm);
+}
+
+.agent-name {
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  color: var(--color-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.agent-role {
+  font-size: 0.625rem;
+  color: var(--color-navy-light);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ========================================
+   STATUS INDICATORS
+   ======================================== */
+
+.status-indicator {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--color-cream);
+  box-shadow: 0 0 10px currentColor;
+}
+
+.status-active {
+  background: var(--color-teal);
+  color: var(--color-teal);
+  animation: pulse-teal 2s infinite;
+}
+
+.status-idle {
+  background: var(--color-yellow);
+  color: var(--color-yellow);
+}
+
+.status-busy {
+  background: var(--color-orange);
+  color: var(--color-orange);
+  animation: pulse-orange 1s infinite;
+}
+
+.status-offline {
+  background: #666;
+  color: #666;
+}
+
+@keyframes pulse-teal {
+  0%, 100% { box-shadow: 0 0 5px var(--color-teal); }
+  50% { box-shadow: 0 0 15px var(--color-teal), 0 0 25px var(--color-teal); }
+}
+
+@keyframes pulse-orange {
+  0%, 100% { box-shadow: 0 0 5px var(--color-orange); }
+  50% { box-shadow: 0 0 15px var(--color-orange); }
+}
+
+/* ========================================
+   FILING CABINET (Repository)
+   ======================================== */
+
+.filing-cabinet {
+  background: var(--color-navy-light);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-asymmetric);
+  padding: var(--space-md);
+  position: relative;
+}
+
+.filing-cabinet::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 4px;
+  background: var(--color-orange);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+.cabinet-label {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--color-cream);
+  text-transform: uppercase;
+  margin-top: var(--space-sm);
+  text-align: center;
+}
+
+.cabinet-files {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* ========================================
+   TASK DESK (Desk)
+   ======================================== */
+
+.task-desk {
+  background: var(--color-bg-card);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-asymmetric);
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  transition: all var(--transition-normal);
+}
+
+.task-desk:hover {
+  border-color: var(--color-orange);
+  background: rgba(212, 101, 47, 0.1);
+}
+
+.task-icon {
+  width: 24px;
+  height: 24px;
+  background: var(--color-orange);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-name {
+  font-size: 0.75rem;
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ========================================
+   STATS PANEL (Side Panel)
+   ======================================== */
+
+.stats-panel {
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-orange), var(--color-teal), var(--color-yellow));
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.stat-item:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  color: var(--color-cream);
+  font-weight: 500;
+}
+
+.stat-value.highlight-orange {
+  color: var(--color-orange);
+}
+
+.stat-value.highlight-teal {
+  color: var(--color-teal);
+}
+
+.stat-value.highlight-yellow {
+  color: var(--color-yellow);
+}
+
+/* ========================================
+   ACTIVITY LOG
+   ======================================== */
+
+.activity-log {
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.activity-entry {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.8125rem;
+}
+
+.activity-entry:last-child {
+  border-bottom: none;
+}
+
+.activity-time {
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  min-width: 50px;
+}
+
+.activity-message {
+  color: var(--color-text-secondary);
+}
+
+.activity-message .highlight {
+  color: var(--color-orange);
+}
+
+/* ========================================
+   GEOMETRIC DECORATIONS
+   ======================================== */
+
+.geo-shape {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.1;
+}
+
+.geo-triangle {
+  width: 0;
+  height: 0;
+  border-left: 30px solid transparent;
+  border-right: 30px solid transparent;
+  border-bottom: 50px solid var(--color-orange);
+}
+
+.geo-circle {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-teal);
+  border-radius: 50%;
+}
+
+.geo-square {
+  width: 30px;
+  height: 30px;
+  background: var(--color-yellow);
+  transform: rotate(45deg);
+}
+
+/* Atomic burst decoration */
+.atomic-burst {
+  position: relative;
+  width: 60px;
+  height: 60px;
+}
+
+.atomic-burst::before,
+.atomic-burst::after {
+  content: '';
+  position: absolute;
+  background: var(--color-orange);
+}
+
+.atomic-burst::before {
+  width: 100%;
+  height: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.atomic-burst::after {
+  width: 4px;
+  height: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.atomic-burst .burst-diagonal {
+  position: absolute;
+  width: 140%;
+  height: 4px;
+  background: var(--color-orange);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.atomic-burst .burst-diagonal-2 {
+  position: absolute;
+  width: 140%;
+  height: 4px;
+  background: var(--color-orange);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+
+.btn {
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: var(--space-sm) var(--space-lg);
+  border: none;
+  border-radius: var(--radius-asymmetric);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-primary {
+  background: var(--color-orange);
+  color: var(--color-cream);
+}
+
+.btn-primary:hover {
+  background: var(--color-orange-light);
+  box-shadow: var(--shadow-glow-orange);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-cream);
+  border: 2px solid var(--color-border-strong);
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-orange);
+  color: var(--color-orange);
+}
+
+/* ========================================
+   COMMITS LIST
+   ======================================== */
+
+.commits-container {
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.commit-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  transition: background var(--transition-fast);
+  text-decoration: none;
+  color: inherit;
+}
+
+.commit-item:hover {
+  background: rgba(245, 241, 230, 0.05);
+}
+
+.commit-item:last-child {
+  border-bottom: none;
+}
+
+.commit-sha {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-teal);
+  background: rgba(45, 138, 139, 0.2);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+}
+
+.commit-message {
+  flex: 1;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.commit-time {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.commit-tag {
+  font-size: 0.625rem;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.commit-tag.today {
+  background: rgba(45, 138, 139, 0.3);
+  color: var(--color-teal);
+}
+
+/* ========================================
+   SCROLLBAR
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-navy-light);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-orange);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .office-floor {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .office-floor {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+    gap: var(--space-md);
+    text-align: center;
+  }
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.5s ease forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s ease forwards;
+}
+
+/* Staggered animations */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }

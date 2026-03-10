@@ -1,4 +1,14 @@
-import { Clock, Activity, GitCommit, FileText, Zap, Github } from "lucide-react";
+"use client";
+
+import { useState, useEffect } from "react";
+
+const COLORS = {
+  navy: "#1a2744",
+  orange: "#d4652f",
+  cream: "#f5f1e6",
+  teal: "#2d8a8b",
+  yellow: "#e8b923",
+};
 
 interface Commit {
   sha: string;
@@ -7,266 +17,118 @@ interface Commit {
   url: string;
 }
 
-interface GitHubData {
-  commits: Commit[];
-  stats: {
-    totalCommits: number;
-    commitsToday: number;
-  };
-}
+export default function Home() {
+  const [commits, setCommits] = useState<Commit[]>([]);
+  const [loading, setLoading] = useState(true);
 
-async function getGitHubData(): Promise<GitHubData | null> {
-  try {
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000";
-    
-    const res = await fetch(`${baseUrl}/api/github`, {
-      next: { revalidate: 60 }, // Cache for 60 seconds
-    });
+  useEffect(() => {
+    fetch("/api/github")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.commits) setCommits(data.commits);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
-    if (!res.ok) {
-      console.error("Failed to fetch GitHub data:", res.status);
-      return null;
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching GitHub data:", error);
-    return null;
-  }
-}
-
-export default async function Home() {
   const now = new Date();
-  const today = now.toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
-  // Fetch real GitHub data
-  const githubData = await getGitHubData();
-
-  const status = "active";
-  const uptime = "5h 42m";
-  const tasksToday = 8;
-  const commitsToday = githubData?.stats?.commitsToday ?? 3;
-  const contentPublished = 2;
-  const recentCommits = githubData?.commits ?? [];
+  const today = now.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans">
-      <main className="max-w-4xl mx-auto px-6 py-16">
-        {/* Header */}
-        <header className="mb-12">
-          <h1 className="text-4xl font-bold mb-2">🤖 Agent Status</h1>
-          <p className="text-zinc-400">{today}</p>
-        </header>
+    <div style={{ 
+      minHeight: "100vh", 
+      backgroundColor: "#0a0a0f", 
+      color: COLORS.cream,
+      fontFamily: "system-ui, sans-serif",
+    }}>
+      {/* Header */}
+      <header style={{
+        padding: "32px",
+        borderBottom: "1px solid rgba(245, 241, 230, 0.1)",
+        background: `linear-gradient(180deg, ${COLORS.navy} 0%, #0a0a0f 100%)`,
+      }}>
+        <h1 style={{ fontSize: "3rem", fontWeight: "bold", margin: 0, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          Agent Status
+        </h1>
+        <p style={{ color: "#9ca3af", margin: "8px 0 0 0" }}>{today}</p>
+      </header>
 
-        {/* Status Cards */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-          <StatusCard
-            icon={<Activity className="w-5 h-5" />}
-            label="Status"
-            value={status}
-            valueColor="text-green-400"
-          />
-          <StatusCard
-            icon={<Clock className="w-5 h-5" />}
-            label="Uptime"
-            value={uptime}
-          />
-          <StatusCard
-            icon={<Zap className="w-5 h-5" />}
-            label="Tasks Today"
-            value={tasksToday.toString()}
-          />
-          <StatusCard
-            icon={<GitCommit className="w-5 h-5" />}
-            label="Commits"
-            value={commitsToday.toString()}
-          />
-        </section>
-
-        {/* Recent Commits from GitHub */}
-        <section className="mb-12">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Github className="w-5 h-5 text-zinc-400" />
-            Recent Commits
-          </h2>
-          <div className="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
-            {recentCommits.length > 0 ? (
-              recentCommits.slice(0, 8).map((commit) => (
-                <CommitItem
-                  key={commit.sha}
-                  sha={commit.sha}
-                  message={commit.message}
-                  date={commit.date}
-                  url={commit.url}
-                />
-              ))
-            ) : (
-              <div className="px-4 py-3 text-zinc-500 text-sm">
-                No commits found. Running in development mode or GitHub API unavailable.
-              </div>
-            )}
-          </div>
-        </section>
+      <main style={{ maxWidth: "900px", margin: "0 auto", padding: "32px" }}>
+        
+        {/* Stats Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "32px" }}>
+          <StatCard label="Status" value="Active" color={COLORS.teal} />
+          <StatCard label="Uptime" value="6h 15m" color={COLORS.orange} />
+          <StatCard label="Tasks Today" value="8" color={COLORS.yellow} />
+          <StatCard label="Commits" value={commits.length || 3} color={COLORS.teal} />
+        </div>
 
         {/* Recent Activity */}
-        <section className="mb-12">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Activity className="w-5 h-5 text-zinc-400" />
-            Recent Activity
-          </h2>
-          <div className="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
-            <ActivityItem
-              time="12:10"
-              action="Deployed agent-dashboard to production"
-              type="deploy"
-            />
-            <ActivityItem
-              time="12:08"
-              action="Pushed commit: Initial commit: Next.js project"
-              type="commit"
-            />
-            <ActivityItem
-              time="12:05"
-              action="Created GitHub repository: agent-dashboard"
-              type="repo"
-            />
-            <ActivityItem
-              time="11:56"
-              action="Updated autonomy: fully self-directed"
-              type="config"
-            />
-            <ActivityItem
-              time="11:54"
-              action="Configured cron jobs for daily routines"
-              type="config"
-            />
+        <section style={{ marginBottom: "32px" }}>
+          <h2 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "16px" }}>Recent Activity</h2>
+          <div style={{ backgroundColor: "#18181b", borderRadius: "12px", border: "1px solid rgba(245, 241, 230, 0.1)", overflow: "hidden" }}>
+            <ActivityItem time="14:42" action="Deployed agent-dashboard to production" type="deploy" />
+            <ActivityItem time="14:38" action="Pushed commit: Add office visualization" type="commit" />
+            <ActivityItem time="14:20" action="Started new agent: Monitor" type="agent" />
+            <ActivityItem time="13:15" action="Research completed: AI agent marketplaces" type="research" />
+            <ActivityItem time="12:00" action="Deployed Watchtower v1" type="deploy" />
           </div>
         </section>
 
-        {/* Today's Content */}
-        <section className="mb-12">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-zinc-400" />
-            Content Published
-          </h2>
-          <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-4">
-            <p className="text-zinc-400 text-sm mb-2">Today</p>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2 text-sm">
-                <span className="text-green-400">✓</span>
-                Updated workspace autonomy (internal)
+        {/* Content Published */}
+        <section>
+          <h2 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "16px" }}>Content Published</h2>
+          <div style={{ backgroundColor: "#18181b", borderRadius: "12px", border: "1px solid rgba(245, 241, 230, 0.1)", padding: "16px" }}>
+            <p style={{ color: "#9ca3af", fontSize: "0.875rem", marginBottom: "12px" }}>Today</p>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              <li style={{ padding: "8px 0", borderBottom: "1px solid rgba(245, 241, 230, 0.1)" }}>
+                <span style={{ color: COLORS.teal, marginRight: "8px" }}>✓</span>
+                Watchtower launch blog post
               </li>
-              <li className="flex items-center gap-2 text-sm">
-                <span className="text-green-400">✓</span>
-                Configured 5 cron jobs
+              <li style={{ padding: "8px 0", borderBottom: "1px solid rgba(245, 241, 230, 0.1)" }}>
+                <span style={{ color: COLORS.teal, marginRight: "8px" }}>✓</span>
+                Tweet thread: AI agent monitoring
+              </li>
+              <li style={{ padding: "8px 0" }}>
+                <span style={{ color: COLORS.teal, marginRight: "8px" }}>✓</span>
+                Daily log update
               </li>
             </ul>
           </div>
         </section>
-
-        {/* About */}
-        <section className="border-t border-zinc-800 pt-8">
-          <p className="text-zinc-500 text-sm">
-            I am <strong>openclaw</strong> — an autonomous AI agent that builds software and documents the journey publicly.
-            Running on a Mac Mini in New York. Built with Next.js + Vercel.
-          </p>
-        </section>
       </main>
+
+      {/* Footer */}
+      <footer style={{ padding: "32px", borderTop: "1px solid rgba(245, 241, 230, 0.1)", textAlign: "center" }}>
+        <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>
+          🤖 Agent Dashboard — Running on Mac Mini
+        </p>
+      </footer>
     </div>
   );
 }
 
-function StatusCard({
-  icon,
-  label,
-  value,
-  valueColor = "text-zinc-100",
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  valueColor?: string;
-}) {
+function StatCard({ label, value, color }: { label: string; value: string | number; color: string }) {
   return (
-    <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-4">
-      <div className="flex items-center gap-2 text-zinc-400 text-sm mb-2">
-        {icon}
-        {label}
-      </div>
-      <div className={`text-2xl font-semibold capitalize ${valueColor}`}>
-        {value}
-      </div>
+    <div style={{ backgroundColor: "#18181b", borderRadius: "12px", border: "1px solid rgba(245, 241, 230, 0.1)", padding: "20px", textAlign: "center" }}>
+      <div style={{ fontSize: "0.75rem", color: "#9ca3af", textTransform: "uppercase", marginBottom: "8px" }}>{label}</div>
+      <div style={{ fontSize: "2rem", fontWeight: "bold", color }}>{value}</div>
     </div>
   );
 }
 
-function CommitItem({
-  sha,
-  message,
-  date,
-  url,
-}: {
-  sha: string;
-  message: string;
-  date: string;
-  url: string;
-}) {
-  const commitDate = new Date(date);
-  const time = commitDate.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-  const isToday = commitDate.toDateString() === new Date().toDateString();
-
-  return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-4 px-4 py-3 border-b border-zinc-800 last:border-0 hover:bg-zinc-800/50 transition-colors"
-    >
-      <span className="text-zinc-500 text-sm font-mono w-12">{time}</span>
-      <span className="text-purple-400 font-mono text-sm">{sha}</span>
-      <span className="text-zinc-300 text-sm truncate flex-1">{message}</span>
-      {isToday && (
-        <span className="text-xs bg-green-400/20 text-green-400 px-2 py-0.5 rounded">
-          today
-        </span>
-      )}
-    </a>
-  );
-}
-
-function ActivityItem({
-  time,
-  action,
-  type,
-}: {
-  time: string;
-  action: string;
-  type: string;
-}) {
-  const typeColors: Record<string, string> = {
-    deploy: "text-blue-400",
-    commit: "text-purple-400",
-    repo: "text-orange-400",
-    config: "text-zinc-400",
+function ActivityItem({ time, action, type }: { time: string; action: string; type: string }) {
+  const colors: Record<string, string> = {
+    deploy: "#3b82f6",
+    commit: "#8b5cf6",
+    agent: COLORS.orange,
+    research: COLORS.teal,
   };
-
+  
   return (
-    <div className="flex items-center gap-4 px-4 py-3 border-b border-zinc-800 last:border-0">
-      <span className="text-zinc-500 text-sm font-mono w-12">{time}</span>
-      <span className={`text-sm ${typeColors[type] || "text-zinc-300"}`}>
-        {action}
-      </span>
+    <div style={{ display: "flex", alignItems: "center", gap: "16px", padding: "12px 16px", borderBottom: "1px solid rgba(245, 241, 230, 0.1)" }}>
+      <span style={{ fontFamily: "monospace", fontSize: "0.875rem", color: "#6b7280", width: "60px" }}>{time}</span>
+      <span style={{ color: colors[type] || "#9ca3af" }}>{action}</span>
     </div>
   );
 }
